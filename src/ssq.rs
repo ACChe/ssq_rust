@@ -47,8 +47,6 @@ fn compare_ssq_red(raw: &Vec<u8>, rand: &Vec<u8>) -> bool {
 
 pub fn get_random_ssq() -> SSQ {
     let ssqjson = get_ssq_from_file();
-    
-    let mut index = 0;
 
     loop {
         let rssq = SSQ::new();
@@ -109,7 +107,6 @@ fn gem_red_numbers() -> Vec<u8>{
             numbers.push(rnt);
             count = count + 1;
         }
-        // println!("NUMBER IS : {:?} ", &numbers)
     }
     numbers
 }
@@ -117,7 +114,6 @@ fn gem_red_numbers() -> Vec<u8>{
 fn gem_blue_number() -> u8{
     let mut rng = rand::thread_rng();
     let rnt = rng.gen_range(1..17);
-    // println!("BLUE NUMBER = {:?}", &rnt);
     rnt
 }
 
