@@ -7,7 +7,7 @@ use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 struct SSQJson {
-    issue:  u16,
+    // issue:  u16,
     red1:   u8,
     red2:   u8,
     red3:   u8,
