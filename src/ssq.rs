@@ -52,19 +52,47 @@ pub fn get_random_ssq() -> SSQ {
         let rssq = SSQ::new();
         for r in &ssqjson {
             let r1 = &ssqjson_to_ssq(&r);
-            if compare_ssq_red(&r1.reds, &rssq.reds) && r1.blue == rssq.blue   {
+            return if compare_ssq_red(&r1.reds, &rssq.reds) && r1.blue == rssq.blue {
                 println!("THE LUCKIED SSQ IS : {:?}", r1);
-                return rssq
-            }  else {
+                rssq
+            } else {
                 println!("THE LUCKY SSQ IS : {:?}", rssq);
-                return rssq;
+                rssq
             }
         }
     }
 
 }
 
-#[derive(Debug)]
+// pub fn get_random_ssq_with_count(number: i8) -> &'static Vec<SSQ> {
+//     let ssqjson = get_ssq_from_file();
+//
+//     let &mut result: Vec<SSQ> = Vec::new();
+//     let mut index = 0;
+//
+//     loop {
+//         if index > number {
+//             // println!("THE LUCKY SSQ IS : {:?}", &result);
+//             return &result
+//         }
+//
+//         let rssq = SSQ::new();
+//         for r in &ssqjson {
+//             let r1 = &ssqjson_to_ssq(&r);
+//             if !compare_ssq_red(&r1.reds, &rssq.reds) && r1.blue == rssq.blue {
+//                 // println!("THE LUCKIED SSQ IS : {:?}", r1);
+//                 for r2  in result {
+//                     if !compare_ssq_red(&r2.reds, &rssq.reds) && r2.blue == rssq.blue {
+//                         result.push(rssq.clone());
+//                         index = index + 1;
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// }
+
+#[derive(Debug, Clone)]
 pub struct SSQ {
     reds:   Vec<u8>,
     blue:   u8
@@ -89,8 +117,8 @@ impl SSQ {
         let reds = gem_red_numbers();
         let blue = gem_blue_number();
         let ssq = Self {
-            reds: reds,
-            blue: blue
+            reds,
+            blue
         };
         ssq
     }
