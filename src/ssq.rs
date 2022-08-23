@@ -47,15 +47,18 @@ fn compare_ssq_red(raw: &Vec<u8>, rand: &Vec<u8>) -> bool {
 
 pub fn get_random_ssq() -> SSQ {
     let ssqjson = get_ssq_from_file();
+    let mut count = 0;
 
     loop {
         let rssq = SSQ::new();
+        count = count + 1;
         for r in &ssqjson {
             let r1 = &ssqjson_to_ssq(&r);
             return if compare_ssq_red(&r1.reds, &rssq.reds) && r1.blue == rssq.blue {
                 println!("THE LUCKIED SSQ IS : {:?}", r1);
                 rssq
             } else {
+                println!("Round : {:?}", count);
                 println!("THE LUCKY SSQ IS : {:?}", rssq);
                 rssq
             }
