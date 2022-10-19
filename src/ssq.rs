@@ -6,7 +6,7 @@ use rand::{thread_rng, Rng};
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
-struct SSQJson {
+pub struct SSQJson {
     // issue:  u16,
     red1: u8,
     red2: u8,
@@ -17,7 +17,7 @@ struct SSQJson {
     blue: u8,
 }
 
-fn get_ssq_from_file() -> Vec<SSQJson> {
+pub fn get_ssq_from_file() -> Vec<SSQ> {
     let path = Path::new("ssq.json");
     let display = path.display();
 
@@ -26,13 +26,13 @@ fn get_ssq_from_file() -> Vec<SSQJson> {
         Ok(file) => file,
     };
 
-    let ssqs: Vec<SSQJson> = serde_json::from_reader(file).expect("error while reading");
+    let ssqsjson: Vec<SSQJson> = serde_json::from_reader(file).expect("error while reading");
 
-    // println!("{:#?}", ssqs);
-    // for ssq in ssqs.iter() {
-    //     println!("{:#?}", ssq);
-    // }
-
+    let mut ssqs = Vec::new();
+    for ssqjson in &ssqsjson {
+        let r = ssqjson_to_ssq(&ssqjson);
+        ssqs.push(r);
+    }
     ssqs
 }
 
@@ -41,57 +41,14 @@ fn compare_ssq_red(raw: &Vec<u8>, rand: &Vec<u8>) -> bool {
     let mut rand1 = rand.clone();
     raw1.sort();
     rand1.sort();
+    // print!("+++++++++++++++++++++++++");
+    // print!("+++++++++++++++++++++++++");
+    // println!("{:?}  ---  {:?}", raw1, rand1);
+    // print!("+++++++++++++++++++++++++");
+    // print!("+++++++++++++++++++++++++");
+    // print!("+++++++++++++++++++++++++");
     raw1 == rand1
 }
-
-pub fn get_random_ssq() -> SSQ {
-    let ssqjson = get_ssq_from_file();
-    let mut count = 0;
-
-    loop {
-        let rssq = SSQ::new();
-        count = count + 1;
-        for r in &ssqjson {
-            let r1 = &ssqjson_to_ssq(&r);
-            return if compare_ssq_red(&r1.reds, &rssq.reds) && r1.blue == rssq.blue {
-                println!("THE LUCKIED SSQ IS : {:?}", r1);
-                rssq
-            } else {
-                println!("Round : {:?}", count);
-                println!("THE LUCKY SSQ IS : {:?}", rssq);
-                rssq
-            };
-        }
-    }
-}
-
-// pub fn get_random_ssq_with_count(number: i8) -> &'static Vec<SSQ> {
-//     let ssqjson = get_ssq_from_file();
-//
-//     let &mut result: Vec<SSQ> = Vec::new();
-//     let mut index = 0;
-//
-//     loop {
-//         if index > number {
-//             // println!("THE LUCKY SSQ IS : {:?}", &result);
-//             return &result
-//         }
-//
-//         let rssq = SSQ::new();
-//         for r in &ssqjson {
-//             let r1 = &ssqjson_to_ssq(&r);
-//             if !compare_ssq_red(&r1.reds, &rssq.reds) && r1.blue == rssq.blue {
-//                 // println!("THE LUCKIED SSQ IS : {:?}", r1);
-//                 for r2  in result {
-//                     if !compare_ssq_red(&r2.reds, &rssq.reds) && r2.blue == rssq.blue {
-//                         result.push(rssq.clone());
-//                         index = index + 1;
-//                     }
-//                 }
-//             }
-//         }
-//     }
-// }
 
 #[derive(Debug, Clone)]
 pub struct SSQ {
@@ -158,53 +115,74 @@ pub fn div_numbers_to_group(mut sequence: Vec<u8>, limit: u8) -> Vec<Vec<u8>> {
     let total: u8 = sequence.len() as u8 / limit;
     let mut result: Vec<Vec<u8>> = Vec::new();
     let mut index = 0;
+    let max = limit as usize;
     while index < total {
-        let temp: Vec<u8> = sequence.drain(0..6).collect();
+        let temp: Vec<u8> = sequence.drain(0..max).collect();
         result.push(temp);
         index += 1;
     }
     result
 }
 
-// General number by specify number
-fn gen_by_specify_number(specify: u8, total: u8, limit: u8) -> Vec<Vec<u8>> {
+// General number by specify amount
+fn gen_by_specify_amount(specify: u8, total: u8, limit: u8) -> Vec<Vec<u8>> {
     let mut result: Vec<Vec<u8>> = Vec::new();
     let pool = gen_numbers_limit(total);
     let mut lucky_numbers = div_numbers_to_group(pool, limit);
-    let s = specify as usize;
+    let max = specify as usize;
     if specify < limit {
-        let temp = lucky_numbers.drain(0..s).collect();
-        println!("Lucky number(s) : {:?}", lucky_numbers);
+        let temp = lucky_numbers.drain(0..max).collect();
+        println!("1Lucky number(s) : {:?}", lucky_numbers);
         result = temp;
         result
     } else {
-        println!("Lucky number(s) : {:?}", lucky_numbers);
+        // println!("2Lucky number(s) : {:?}", lucky_numbers);
+        result = lucky_numbers;
         result
     }
 }
 
 // General numbers by user need
-pub fn gen_by_user(wanted: u8, total: u8, limit: u8) -> Vec<Vec<u8>> {
+pub fn gen_by_user(wanted: u8, total: u8, limit: u8, pool: &Vec<SSQ>) -> Vec<Vec<u8>> {
     let mut result: Vec<Vec<u8>> = Vec::new();
     //  可以产生多少组
     let count = total / limit;
     //  取整的组数
     let wanted_divide = wanted / count;
+    println!("wanted_divide = {}", wanted_divide);
     //  取整的余数
     let wanted_mod = wanted % count;
+    println!("wanted_mod = {}", wanted_mod);
 
     let mut index = 0;
     while index < wanted_divide {
-        let mut temp = gen_by_specify_number(wanted, total, limit);
-        result.append(&mut temp);
-        index += 1;
+        let mut temp = gen_by_specify_amount(wanted, total, limit);
+        println!("temp1 = {:?}", temp);
+        if !is_duplicated(&temp, &pool) {
+            result.append(&mut temp);
+            index += 1;
+        }
     }
-
-    index = 0;
-    while index < wanted_mod {
-        let mut temp = gen_by_specify_number(wanted_mod, total, limit);
-        result.append(&mut temp);
-        index += 1;
+    let mut isDuplicate = true;
+    while isDuplicate {
+        let mut temp = gen_by_specify_amount(wanted_mod, total, limit);
+        println!("temp2 = {:?}", temp);
+        if !is_duplicated(&temp, &pool) {
+            result.append(&mut temp);
+            isDuplicate = false
+        }
     }
     result
+}
+
+fn is_duplicated(cells: &Vec<Vec<u8>>, pool: &Vec<SSQ>) -> bool {
+    for cell in cells {
+        for mono in pool {
+            if compare_ssq_red(&cell, &mono.reds) {
+                println!("遇上相同的号码组!");
+                return true;
+            }
+        }
+    }
+    return false;
 }
