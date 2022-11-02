@@ -41,12 +41,6 @@ fn compare_ssq_red(raw: &Vec<u8>, rand: &Vec<u8>) -> bool {
     let mut rand1 = rand.clone();
     raw1.sort();
     rand1.sort();
-    // print!("+++++++++++++++++++++++++");
-    // print!("+++++++++++++++++++++++++");
-    // println!("{:?}  ---  {:?}", raw1, rand1);
-    // print!("+++++++++++++++++++++++++");
-    // print!("+++++++++++++++++++++++++");
-    // print!("+++++++++++++++++++++++++");
     raw1 == rand1
 }
 
@@ -163,13 +157,13 @@ pub fn gen_by_user(wanted: u8, total: u8, limit: u8, pool: &Vec<SSQ>) -> Vec<Vec
             index += 1;
         }
     }
-    let mut isDuplicate = true;
-    while isDuplicate {
+    let mut is_duplicate = true;
+    while is_duplicate {
         let mut temp = gen_by_specify_amount(wanted_mod, total, limit);
         println!("temp2 = {:?}", temp);
         if !is_duplicated(&temp, &pool) {
             result.append(&mut temp);
-            isDuplicate = false
+            is_duplicate = false
         }
     }
     result
