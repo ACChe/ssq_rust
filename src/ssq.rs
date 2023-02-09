@@ -1,8 +1,8 @@
+use std::fs::File;
 use std::path::Path;
-use std::{arch::aarch64::int32x2_t, fs::File};
 extern crate rand;
 use rand::seq::SliceRandom;
-use rand::{thread_rng, Rng};
+use rand::Rng;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -120,19 +120,16 @@ pub fn div_numbers_to_group(mut sequence: Vec<u8>, limit: u8) -> Vec<Vec<u8>> {
 
 // General number by specify amount
 fn gen_by_specify_amount(specify: u8, total: u8, limit: u8) -> Vec<Vec<u8>> {
-    let mut result: Vec<Vec<u8>> = Vec::new();
     let pool = gen_numbers_limit(total);
     let mut lucky_numbers = div_numbers_to_group(pool, limit);
     let max = specify as usize;
     if specify < limit {
         let temp = lucky_numbers.drain(0..max).collect();
         println!("1Lucky number(s) : {:?}", lucky_numbers);
-        result = temp;
-        result
+        temp
     } else {
         // println!("2Lucky number(s) : {:?}", lucky_numbers);
-        result = lucky_numbers;
-        result
+        lucky_numbers
     }
 }
 
