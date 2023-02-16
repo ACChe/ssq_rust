@@ -105,13 +105,20 @@ fn gen_numbers_limit(max: u8) -> Vec<u8> {
 }
 
 // Divide the sequence
-pub fn div_numbers_to_group(mut sequence: Vec<u8>, limit: u8) -> Vec<Vec<u8>> {
+pub fn div_numbers_to_group(mut sequence: Vec<u8>, limit: u8) -> Vec<SSQ> {
     let total: u8 = sequence.len() as u8 / limit;
-    let mut result: Vec<Vec<u8>> = Vec::new();
+    let mut result: Vec<SSQ> = Vec::new();
     let mut index = 0;
     let max = limit as usize;
     while index < total {
-        let temp: Vec<u8> = sequence.drain(0..max).collect();
+        let mut temp: SSQ = SSQ {
+            reds: [0, 0, 0, 0, 0, 0].to_vec(),
+            blue: 0,
+        };
+        let r: Vec<u8> = sequence.drain(0..max).collect();
+        let b = gen_blue_number();
+        temp.reds = r;
+        temp.blue = b;
         result.push(temp);
         index += 1;
     }
@@ -119,7 +126,7 @@ pub fn div_numbers_to_group(mut sequence: Vec<u8>, limit: u8) -> Vec<Vec<u8>> {
 }
 
 // General number by specify amount
-fn gen_by_specify_amount(specify: u8, total: u8, limit: u8) -> Vec<Vec<u8>> {
+fn gen_by_specify_amount(specify: u8, total: u8, limit: u8) -> Vec<SSQ> {
     let pool = gen_numbers_limit(total);
     let mut lucky_numbers = div_numbers_to_group(pool, limit);
     let max = specify as usize;
@@ -134,8 +141,8 @@ fn gen_by_specify_amount(specify: u8, total: u8, limit: u8) -> Vec<Vec<u8>> {
 }
 
 // General numbers by user need
-pub fn gen_by_user(wanted: u8, total: u8, limit: u8, pool: &Vec<SSQ>) -> Vec<Vec<u8>> {
-    let mut result: Vec<Vec<u8>> = Vec::new();
+pub fn gen_by_user(wanted: u8, total: u8, limit: u8, pool: &Vec<SSQ>) -> Vec<SSQ> {
+    let mut result: Vec<SSQ> = Vec::new();
     //  可以产生多少组
     let count = total / limit;
     //  取整的组数
@@ -154,22 +161,24 @@ pub fn gen_by_user(wanted: u8, total: u8, limit: u8, pool: &Vec<SSQ>) -> Vec<Vec
             index += 1;
         }
     }
-    let mut is_duplicate = true;
-    while is_duplicate {
+    if wanted_mod > 0 {
         let mut temp = gen_by_specify_amount(wanted_mod, total, limit);
         println!("temp2 = {:?}", temp);
         if !is_duplicated(&temp, &pool) {
             result.append(&mut temp);
-            is_duplicate = false
         }
     }
+    // let mut is_duplicate = true;
+    // while is_duplicate {
+
+    // }
     result
 }
 
-fn is_duplicated(cells: &Vec<Vec<u8>>, pool: &Vec<SSQ>) -> bool {
+fn is_duplicated(cells: &Vec<SSQ>, pool: &Vec<SSQ>) -> bool {
     for cell in cells {
         for mono in pool {
-            if compare_ssq_red(&cell, &mono.reds) {
+            if compare_ssq_red(&cell.reds, &mono.reds) {
                 println!("遇上相同的号码组!");
                 return true;
             }
