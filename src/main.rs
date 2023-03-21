@@ -14,5 +14,7 @@ pub fn main() {
 
     let ssq_pool = ssq::get_ssq_from_file();
     let ssq = ssq::gen_by_user(amount, 33, 6, &ssq_pool);
-    println!("ssq = {:?}", ssq);
+    for (i, item) in ssq.iter().enumerate() {
+        println!("{:?}", item);
+    }
 }
